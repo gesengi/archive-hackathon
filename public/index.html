@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcHive - Agentic Economy</title>
+    <style>
+        body { font-family: 'Courier New', Courier, monospace; background-color: #0d1117; color: #c9d1d9; margin: 0; padding: 40px; display: flex; flex-direction: column; align-items: center; }
+        h1 { color: #58a6ff; margin-bottom: 5px; }
+        p { margin-bottom: 20px; color: #8b949e; }
+        input { width: 100%; max-width: 600px; padding: 15px; font-size: 16px; margin-bottom: 20px; background: #010409; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; }
+        button { background-color: #238636; color: white; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 6px; margin-bottom: 20px; transition: 0.2s;}
+        button:hover { background-color: #2ea043; }
+        button:disabled { background-color: #484f58; cursor: not-allowed; }
+        #terminal { background-color: #010409; border: 1px solid #30363d; border-radius: 6px; width: 100%; max-width: 900px; height: 500px; padding: 20px; overflow-y: auto; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+        .log-entry { margin-bottom: 10px; line-height: 1.5; font-size: 15px;}
+        .highlight { color: #3fb950; font-weight: bold; }
+        .ai-text { color: #a5d6ff; }
+    </style>
+</head>
+<body>
+    <h1>ArcHive: The Agentic Assembly Line</h1>
+    <p>Powered by Circle Nanopayments & Google Gemini on the Arc L1</p>
+    
+    <!-- THE NEW TEXT BOX! -->
+    <input type="text" id="taskInput" value="I have a dataset of 50 receipts. Extract the total price from each one.">
+    
+    <button id="startBtn">🚀 Start Agent Swarm</button>
+    
+    <div id="terminal">
+        <div class="log-entry">Waiting for human prompt...</div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('startBtn');
+        const terminal = document.getElementById('terminal');
+        const input = document.getElementById('taskInput');
+
+        btn.addEventListener('click', () => {
+            btn.disabled = true;
+            input.disabled = true; // Lock the text box while running
+            btn.innerText = "⚙️ Swarm is Running on Arc...";
+            terminal.innerHTML = ""; 
+
+            // Grab the text from the box and send it to the server!
+            const userPrompt = encodeURIComponent(input.value);
+            const source = new EventSource('/api/start?task=' + userPrompt);
+
+            source.onmessage = function(event) {
+                const newLog = document.createElement('div');
+                newLog.className = 'log-entry';
+                
+                let text = event.data;
+                if (text.includes("💸") || text.includes("✅")) text = `<span class="highlight">${text}</span>`;
+                if (text.includes("🤖")) text = `<span class="ai-text">${text}</span>`;
+                
+                newLog.innerHTML = text;
+                terminal.appendChild(newLog);
+                terminal.scrollTop = terminal.scrollHeight;
+            };
+
+            source.onerror = function() {
+                source.close();
+                btn.innerText = "✅ Assembly Line Complete!";
+            };
+        });
+    </script>
+</body>
+</html>
